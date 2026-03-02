@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Remise en stock Laval • Ops Hub</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="remise">
+    <header class="topbar glass">
+      <div>
+        <h1>Remise en stock Laval v1</h1>
+        <p class="subtitle">Mobile-first • 1 scan = 1 pièce • ID LAVREM0001</p>
+      </div>
+      <button id="themeToggle" class="btn ghost">🌙 Thème</button>
+    </header>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="inventaire.html">Inventaire palettes</a>
+      <a href="consolidation.html">Consolidation IA</a>
+      <a href="remise.html" class="active">Remise en stock</a>
+      <a href="parametres.html">Paramètres & KB</a>
+    </nav>
+
+    <main class="grid mobile-stack">
+      <section class="card depth wide">
+        <h2>Générer une remise</h2>
+        <p class="big-id" id="remiseId">LAVREM0001</p>
+        <form id="remiseScanForm" class="inline-form">
+          <input id="remiseItem" placeholder="Scanner item" required />
+          <button class="btn">Ajouter pièce</button>
+        </form>
+      </section>
+
+      <section class="card depth wide">
+        <h2>Liste active</h2>
+        <ul id="remiseList" class="list"></ul>
+        <button id="archiveRemiseBtn" class="btn">Compléter & Archiver</button>
+      </section>
+
+      <section class="card depth wide">
+        <details>
+          <summary>Archives remises</summary>
+          <ul id="remiseArchive" class="list"></ul>
+        </details>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

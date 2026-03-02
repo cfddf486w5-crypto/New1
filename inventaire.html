@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventaire palettes • Ops Hub</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="inventaire">
+    <header class="topbar glass">
+      <div>
+        <h1>Inventaire palettes (style WMS)</h1>
+        <p class="subtitle">Format ID: BE0000001 • fermeture palette automatisée</p>
+      </div>
+      <button id="themeToggle" class="btn ghost">🌙 Thème</button>
+    </header>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="inventaire.html" class="active">Inventaire palettes</a>
+      <a href="consolidation.html">Consolidation IA</a>
+      <a href="remise.html">Remise en stock</a>
+      <a href="parametres.html">Paramètres & KB</a>
+    </nav>
+
+    <main class="grid">
+      <section class="card depth">
+        <h2>Scan</h2>
+        <div class="label">ID palette active</div>
+        <p id="activePalette" class="big-id">BE0000001</p>
+        <form id="scanForm" class="inline-form">
+          <input id="scanInput" placeholder="Scanner code-barres" required autofocus />
+          <input id="itemInput" placeholder="Nom item (manuel)" required />
+          <button class="btn">Ajouter</button>
+        </form>
+        <button id="closePaletteBtn" class="btn">Palette terminée / Fermeture</button>
+      </section>
+
+      <section class="card depth">
+        <h2>Items palette active</h2>
+        <ul id="scanList" class="list"></ul>
+      </section>
+
+      <section class="card depth wide">
+        <details open>
+          <summary>Historique de palette (plus récent en haut)</summary>
+          <ul id="historyList" class="list"></ul>
+        </details>
+      </section>
+
+      <section class="card depth wide">
+        <details>
+          <summary>Registre de palette</summary>
+          <ul id="registryList" class="list compact"></ul>
+        </details>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

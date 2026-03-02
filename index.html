@@ -3,101 +3,68 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nova Productivité</title>
+    <title>Transbec DAI • Ops Hub</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
-    <header class="topbar">
+  <body data-page="dashboard">
+    <header class="topbar glass">
       <div>
-        <h1>Nova Productivité</h1>
-        <p class="subtitle">Planifier, agir, analyser — en un seul cockpit.</p>
+        <h1>Ops Hub Québec</h1>
+        <p class="subtitle">Cockpit unifié — Laval2, Langelier, Laval</p>
       </div>
-      <div class="topbar-actions">
-        <button id="themeToggle" class="btn ghost">🌙 Thème</button>
-        <button id="exportBtn" class="btn">Exporter JSON</button>
-        <label class="btn ghost" for="importInput">Importer JSON</label>
-        <input id="importInput" type="file" accept="application/json" hidden />
-      </div>
+      <button id="themeToggle" class="btn ghost">🌙 Thème</button>
     </header>
 
+    <nav class="main-nav">
+      <a href="index.html" class="active">Dashboard</a>
+      <a href="inventaire.html">Inventaire palettes</a>
+      <a href="consolidation.html">Consolidation IA</a>
+      <a href="remise.html">Remise en stock</a>
+      <a href="parametres.html">Paramètres & KB</a>
+    </nav>
+
     <main class="grid">
-      <section class="card focus-card">
-        <h2>🎯 Focus du jour</h2>
-        <form id="focusForm" class="inline-form">
-          <input id="focusInput" type="text" maxlength="120" placeholder="Objectif principal du jour" required />
-          <button class="btn" type="submit">Mettre à jour</button>
-        </form>
-        <p id="focusDisplay" class="focus-display">Aucun focus défini.</p>
-      </section>
-
-      <section class="card">
-        <h2>✅ Tâches</h2>
-        <form id="taskForm" class="inline-form">
-          <input id="taskTitle" type="text" placeholder="Nouvelle tâche" required />
-          <select id="taskPriority">
-            <option value="low">Priorité basse</option>
-            <option value="medium" selected>Priorité moyenne</option>
-            <option value="high">Priorité haute</option>
-          </select>
-          <input id="taskDue" type="date" />
-          <button class="btn" type="submit">Ajouter</button>
-        </form>
-        <ul id="taskList" class="list"></ul>
-      </section>
-
-      <section class="card">
-        <h2>🧠 Notes rapides</h2>
-        <form id="noteForm" class="inline-form">
-          <input id="noteInput" type="text" maxlength="200" placeholder="Idée, décision, rappel..." required />
-          <button class="btn" type="submit">Sauver</button>
-        </form>
-        <ul id="noteList" class="list"></ul>
-      </section>
-
-      <section class="card">
-        <h2>🍅 Focus Timer (Pomodoro)</h2>
-        <div class="timer-wrap">
-          <p id="timerValue" class="timer">25:00</p>
-          <div class="timer-controls">
-            <button id="startTimer" class="btn">Démarrer</button>
-            <button id="pauseTimer" class="btn ghost">Pause</button>
-            <button id="resetTimer" class="btn ghost">Reset</button>
-          </div>
-          <div class="inline-form">
-            <label>Travail <input id="workMinutes" type="number" min="1" max="120" value="25" /></label>
-            <label>Pause <input id="breakMinutes" type="number" min="1" max="60" value="5" /></label>
-          </div>
-          <p id="timerState" class="muted">Mode: Travail</p>
+      <section class="card depth">
+        <h2>🎯 Objectif stratégique</h2>
+        <p>
+          Optimiser les opérations, réduire les pertes d’inventaire, éliminer le zero-pick et unifier les équipes au Canada.
+        </p>
+        <div class="pill-row">
+          <span class="pill">WMS Epicor Indago</span>
+          <span class="pill">Offline-first</span>
+          <span class="pill">Confidentialité locale</span>
         </div>
       </section>
 
-      <section class="card">
-        <h2>📈 Habitudes</h2>
-        <form id="habitForm" class="inline-form">
-          <input id="habitInput" type="text" placeholder="Nouvelle habitude" required />
-          <button class="btn" type="submit">Ajouter</button>
-        </form>
-        <ul id="habitList" class="list"></ul>
-      </section>
-
-      <section class="card">
-        <h2>📊 Dashboard</h2>
-        <div class="stats" id="stats"></div>
-        <canvas id="weeklyCanvas" width="640" height="220" aria-label="Graphique hebdo"></canvas>
-      </section>
-
-      <section class="card wide">
-        <h2>⌨️ Raccourcis</h2>
-        <ul class="hint-list">
-          <li><kbd>Alt</kbd> + <kbd>T</kbd> : Focus champ tâche</li>
-          <li><kbd>Alt</kbd> + <kbd>N</kbd> : Focus champ note</li>
-          <li><kbd>Alt</kbd> + <kbd>F</kbd> : Focus du jour</li>
-          <li><kbd>Alt</kbd> + <kbd>P</kbd> : Démarrer/Pause timer</li>
+      <section class="card depth">
+        <h2>🏭 Sites</h2>
+        <ul class="list compact">
+          <li>Laval2 — opérations DAI</li>
+          <li>Langelier — opérations DAI</li>
+          <li>Laval (maison mère) — opérations Transbec</li>
+          <li>Berlier — fermé, déplacé vers Laval2</li>
         </ul>
       </section>
-    </main>
 
-    <footer class="footer">Construit pour une productivité extrême ⚡ — 100% local, sans dépendance.</footer>
+      <section class="card depth wide">
+        <h2>⚡ Accès rapide</h2>
+        <div class="quick-grid">
+          <a class="quick" href="inventaire.html">Créer/fermer palettes BE0000001</a>
+          <a class="quick" href="consolidation.html">Importer inventaire & générer moves</a>
+          <a class="quick" href="remise.html">Flow mobile remise LAVREM0001</a>
+          <a class="quick" href="parametres.html">Overrides diamètre, users, KB IA</a>
+        </div>
+      </section>
+
+      <section class="card depth wide">
+        <h2>📝 Tâches globales</h2>
+        <form id="globalTaskForm" class="inline-form">
+          <input id="globalTaskInput" placeholder="Ajouter une tâche opérationnelle" required />
+          <button class="btn" type="submit">Ajouter</button>
+        </form>
+        <ul id="globalTaskList" class="list"></ul>
+      </section>
+    </main>
 
     <script src="app.js"></script>
   </body>

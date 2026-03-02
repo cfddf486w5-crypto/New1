@@ -1,32 +1,17 @@
-# Nova Productivité
+# Ops Hub Québec — Transbec DAI
 
-Application web **ultra productive** en français, autonome (HTML/CSS/JS), pensée pour piloter la journée dans une seule interface.
+Application HTML/CSS/JS multi-pages orientée opérations entrepôt (offline-first), avec navigation complète et logique liée entre modules:
 
-## Fonctionnalités
+- Dashboard unifié des sites.
+- Inventaire palettes (ID `BE0000001`, scan, fermeture, historique, registre).
+- Consolidation IA (imports manuels `SKU;BIN;QTY`, catégorisation rapports, section À valider).
+- Remise en stock Laval mobile-first (ID `LAVREM0001`, scan par pièce, archivage).
+- Paramètres (users locaux, KB IA locale, export annexes JSON).
 
-- Focus du jour avec édition rapide.
-- Gestion de tâches avec priorité, échéance, statut et suppression.
-- Notes rapides horodatées.
-- Timer Pomodoro (travail/pause) configurable.
-- Gestion d’habitudes quotidiennes avec calcul de streak.
-- Dashboard avec statistiques globales.
-- Graphique hebdomadaire des sessions Pomodoro (canvas).
-- Export/import JSON de toutes les données.
-- Thème sombre/clair persistant.
-- Raccourcis clavier (Alt+T, Alt+N, Alt+F, Alt+P).
-- Persistance locale via `localStorage`.
-
-## Lancer localement
+## Lancer
 
 ```bash
 python3 -m http.server 4173
 ```
 
-Puis ouvrir `http://localhost:4173`.
-
-## Structure
-
-- `index.html` — interface principale.
-- `styles.css` — design système + thèmes.
-- `app.js` — logique applicative complète et persistance.
-
+Puis ouvrir `http://localhost:4173/index.html`.

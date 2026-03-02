@@ -1,454 +1,148 @@
-const STORAGE_KEY = "nova-productivite-v1";
-const state = {
-  theme: "dark",
-  focus: "",
-  tasks: [],
-  notes: [],
-  habits: [],
-  timer: {
-    mode: "work",
-    remaining: 25 * 60,
-    workMinutes: 25,
-    breakMinutes: 5,
-    running: false,
-    sessionsDone: 0,
-    weeklySessions: {},
-  },
-};
+const STORAGE_KEY = "opsHubV1";
+const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};
+state.theme = state.theme || "dark";
+state.globalTasks = state.globalTasks || [];
+state.pallet = state.pallet || { next: 1, active: [], history: [], registry: [] };
+state.consolidation = state.consolidation || { receipts: [] };
+state.remise = state.remise || { next: 1, active: {}, archive: [] };
+state.users = state.users || [];
+state.kb = state.kb || "";
 
-const els = {
-  body: document.body,
-  themeToggle: document.getElementById("themeToggle"),
-  exportBtn: document.getElementById("exportBtn"),
-  importInput: document.getElementById("importInput"),
+const $ = (id) => document.getElementById(id);
+const page = document.body.dataset.page;
 
-  focusForm: document.getElementById("focusForm"),
-  focusInput: document.getElementById("focusInput"),
-  focusDisplay: document.getElementById("focusDisplay"),
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function id(prefix, n, len = 7) { return `${prefix}${String(n).padStart(len, "0")}`; }
+function setTheme(next) { document.body.classList.toggle("light", next === "light"); state.theme = next; save(); }
+setTheme(state.theme);
 
-  taskForm: document.getElementById("taskForm"),
-  taskTitle: document.getElementById("taskTitle"),
-  taskPriority: document.getElementById("taskPriority"),
-  taskDue: document.getElementById("taskDue"),
-  taskList: document.getElementById("taskList"),
+$("themeToggle")?.addEventListener("click", () => setTheme(state.theme === "light" ? "dark" : "light"));
 
-  noteForm: document.getElementById("noteForm"),
-  noteInput: document.getElementById("noteInput"),
-  noteList: document.getElementById("noteList"),
-
-  habitForm: document.getElementById("habitForm"),
-  habitInput: document.getElementById("habitInput"),
-  habitList: document.getElementById("habitList"),
-
-  timerValue: document.getElementById("timerValue"),
-  timerState: document.getElementById("timerState"),
-  startTimer: document.getElementById("startTimer"),
-  pauseTimer: document.getElementById("pauseTimer"),
-  resetTimer: document.getElementById("resetTimer"),
-  workMinutes: document.getElementById("workMinutes"),
-  breakMinutes: document.getElementById("breakMinutes"),
-
-  stats: document.getElementById("stats"),
-  weeklyCanvas: document.getElementById("weeklyCanvas"),
-};
-
-let timerHandle = null;
-
-function uid() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function todayKey(d = new Date()) {
-  return d.toISOString().slice(0, 10);
-}
-
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-function load() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
-  try {
-    const parsed = JSON.parse(raw);
-    Object.assign(state, parsed);
-  } catch {
-    console.warn("Impossible de charger les données.");
-  }
-}
-
-function setTheme(theme) {
-  state.theme = theme;
-  els.body.classList.toggle("light", theme === "light");
-  els.themeToggle.textContent = theme === "light" ? "🌙 Thème" : "☀️ Thème";
-}
-
-function renderFocus() {
-  els.focusDisplay.textContent = state.focus || "Aucun focus défini.";
-}
-
-function renderTasks() {
-  els.taskList.innerHTML = "";
-  const sorted = [...state.tasks].sort((a, b) => Number(a.done) - Number(b.done));
-  for (const task of sorted) {
+function renderGlobalTasks() {
+  const ul = $("globalTaskList");
+  if (!ul) return;
+  ul.innerHTML = "";
+  [...state.globalTasks].reverse().forEach((t, i) => {
     const li = document.createElement("li");
-    li.className = "item";
-    li.innerHTML = `
-      <div>
-        <div><strong>${escapeHtml(task.title)}</strong> <span class="badge ${task.priority}">${labelPriority(task.priority)}</span></div>
-        <div class="meta">${task.done ? "Terminée" : "En cours"}${task.due ? ` • Échéance ${task.due}` : ""}</div>
-      </div>
-      <div class="actions">
-        <button data-action="toggle" data-id="${task.id}">${task.done ? "↩" : "✓"}</button>
-        <button data-action="delete" data-id="${task.id}">🗑</button>
-      </div>`;
-    els.taskList.appendChild(li);
-  }
+    li.innerHTML = `<span>${t}</span><button class="btn ghost" data-i="${i}">Supprimer</button>`;
+    ul.appendChild(li);
+  });
+  ul.querySelectorAll("button").forEach((b) => b.onclick = () => {
+    const idx = state.globalTasks.length - 1 - Number(b.dataset.i);
+    state.globalTasks.splice(idx, 1); save(); renderGlobalTasks();
+  });
 }
 
-function renderNotes() {
-  els.noteList.innerHTML = "";
-  for (const note of [...state.notes].reverse()) {
+if (page === "dashboard") {
+  renderGlobalTasks();
+  $("globalTaskForm").onsubmit = (e) => {
+    e.preventDefault();
+    state.globalTasks.push($("globalTaskInput").value.trim());
+    $("globalTaskInput").value = "";
+    save(); renderGlobalTasks();
+  };
+}
+
+function renderInventaire() {
+  const activeId = id("BE", state.pallet.next);
+  $("activePalette").textContent = activeId;
+  $("scanList").innerHTML = state.pallet.active.map((r) => `<li><span>${r.code}</span><span>${r.item}</span></li>`).join("");
+  $("historyList").innerHTML = [...state.pallet.history].reverse().map((h) => `<li><span>${h.id}</span><span>${h.count} lignes</span></li>`).join("");
+  $("registryList").innerHTML = [...state.pallet.registry].reverse().map((r) => `<li>${r.id} | ${r.code} | ${r.qr}</li>`).join("");
+}
+
+if (page === "inventaire") {
+  renderInventaire();
+  $("scanForm").onsubmit = (e) => {
+    e.preventDefault();
+    state.pallet.active.push({ code: $("scanInput").value.trim(), item: $("itemInput").value.trim() });
+    $("scanInput").value = ""; $("itemInput").value = "";
+    save(); renderInventaire(); $("scanInput").focus();
+  };
+  $("closePaletteBtn").onclick = () => {
+    const pid = id("BE", state.pallet.next);
+    state.pallet.history.push({ id: pid, count: state.pallet.active.length, lines: state.pallet.active });
+    state.pallet.registry.push({ id: pid, code: `PAL-${pid}`, qr: `QR-${pid}` });
+    state.pallet.active = []; state.pallet.next += 1;
+    save(); renderInventaire();
+  };
+}
+
+function classify(qty) {
+  if (qty >= 1 && qty <= 6) return "report1";
+  if (qty >= 7 && qty <= 20) return "report2";
+  return "validation";
+}
+function renderConsolidation() {
+  const r1 = $("report1"), r2 = $("report2"), rv = $("validationList");
+  if (!r1) return;
+  r1.innerHTML = ""; r2.innerHTML = ""; rv.innerHTML = "";
+  state.consolidation.receipts.forEach((line) => {
     const li = document.createElement("li");
-    li.className = "item";
-    li.innerHTML = `
-      <div>
-        <div>${escapeHtml(note.text)}</div>
-        <div class="meta">${note.createdAt}</div>
-      </div>
-      <div class="actions">
-        <button data-action="delete-note" data-id="${note.id}">🗑</button>
-      </div>`;
-    els.noteList.appendChild(li);
-  }
-}
-
-function renderHabits() {
-  const today = todayKey();
-  els.habitList.innerHTML = "";
-  for (const habit of state.habits) {
-    const doneToday = habit.doneDates.includes(today);
-    const li = document.createElement("li");
-    li.className = "item";
-    li.innerHTML = `
-      <div>
-        <div><strong>${escapeHtml(habit.title)}</strong></div>
-        <div class="meta">Streak: ${habit.streak} jour(s)</div>
-      </div>
-      <div class="actions">
-        <button data-action="toggle-habit" data-id="${habit.id}">${doneToday ? "Annuler" : "Valider"}</button>
-        <button data-action="delete-habit" data-id="${habit.id}">🗑</button>
-      </div>`;
-    els.habitList.appendChild(li);
-  }
-}
-
-function labelPriority(p) {
-  return p === "high" ? "Haute" : p === "medium" ? "Moyenne" : "Basse";
-}
-
-function escapeHtml(value) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function renderTimer() {
-  const minutes = Math.floor(state.timer.remaining / 60);
-  const seconds = state.timer.remaining % 60;
-  els.timerValue.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-  els.timerState.textContent = `Mode: ${state.timer.mode === "work" ? "Travail" : "Pause"}`;
-  els.workMinutes.value = state.timer.workMinutes;
-  els.breakMinutes.value = state.timer.breakMinutes;
-}
-
-function stepTimer() {
-  if (!state.timer.running) return;
-  state.timer.remaining -= 1;
-  if (state.timer.remaining <= 0) {
-    if (state.timer.mode === "work") {
-      state.timer.sessionsDone += 1;
-      const key = todayKey();
-      state.timer.weeklySessions[key] = (state.timer.weeklySessions[key] || 0) + 1;
-    }
-    state.timer.mode = state.timer.mode === "work" ? "break" : "work";
-    state.timer.remaining = (state.timer.mode === "work" ? state.timer.workMinutes : state.timer.breakMinutes) * 60;
-  }
-  renderTimer();
-  renderStats();
-  save();
-}
-
-function startTimerLoop() {
-  if (timerHandle) clearInterval(timerHandle);
-  timerHandle = setInterval(stepTimer, 1000);
-}
-
-function resetTimerToMode() {
-  state.timer.remaining = (state.timer.mode === "work" ? state.timer.workMinutes : state.timer.breakMinutes) * 60;
-}
-
-function getWeeklySeries() {
-  const arr = [];
-  for (let i = 6; i >= 0; i -= 1) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const k = todayKey(d);
-    arr.push({
-      label: k.slice(5),
-      value: state.timer.weeklySessions[k] || 0,
-    });
-  }
-  return arr;
-}
-
-function drawWeeklyChart() {
-  const ctx = els.weeklyCanvas.getContext("2d");
-  const w = els.weeklyCanvas.width;
-  const h = els.weeklyCanvas.height;
-  ctx.clearRect(0, 0, w, h);
-
-  const data = getWeeklySeries();
-  const max = Math.max(1, ...data.map((d) => d.value));
-  const pad = 25;
-  const chartH = h - pad * 2;
-  const barW = (w - pad * 2) / data.length - 14;
-
-  data.forEach((d, i) => {
-    const x = pad + i * (barW + 14);
-    const barHeight = (d.value / max) * (chartH - 20);
-    const y = h - pad - barHeight;
-    ctx.fillStyle = "#4ea3ff";
-    ctx.fillRect(x, y, barW, barHeight);
-    ctx.fillStyle = "#93a7d8";
-    ctx.fillText(d.label, x, h - 8);
-    ctx.fillStyle = "#e8edff";
-    ctx.fillText(String(d.value), x + barW / 3, y - 4);
+    li.innerHTML = `<span>${line.sku} → ${line.bin} (${line.qty})</span><button class="btn ghost">Why</button>`;
+    const c = classify(line.qty);
+    (c === "report1" ? r1 : c === "report2" ? r2 : rv).appendChild(li);
   });
 }
-
-function renderStats() {
-  const totalTasks = state.tasks.length;
-  const doneTasks = state.tasks.filter((t) => t.done).length;
-  const habitDoneToday = state.habits.filter((h) => h.doneDates.includes(todayKey())).length;
-
-  els.stats.innerHTML = [
-    ["Tâches totales", totalTasks],
-    ["Tâches complétées", doneTasks],
-    ["Sessions Pomodoro", state.timer.sessionsDone],
-    ["Habitudes faites (aujourd'hui)", habitDoneToday],
-    ["Notes", state.notes.length],
-  ]
-    .map(
-      ([label, value]) =>
-        `<div class="stat"><div class="label">${label}</div><div class="value">${value}</div></div>`,
-    )
-    .join("");
-  drawWeeklyChart();
+if (page === "consolidation") {
+  renderConsolidation();
+  $("addReceiptBtn").onclick = () => {
+    const raw = $("receiptInput").value.trim();
+    const [sku, bin, qtyTxt] = raw.split(";");
+    const qty = Number(qtyTxt);
+    if (!sku || !bin || Number.isNaN(qty)) return;
+    state.consolidation.receipts.push({ sku, bin, qty });
+    $("receiptInput").value = "";
+    save(); renderConsolidation();
+  };
+  $("simulateBtn").onclick = () => {
+    alert("Simulation complétée: tri criticité + split max 3 + staging priorisé (prototype offline).");
+  };
 }
 
-function bindEvents() {
-  els.themeToggle.addEventListener("click", () => {
-    setTheme(state.theme === "light" ? "dark" : "light");
-    save();
-  });
-
-  els.focusForm.addEventListener("submit", (e) => {
+function renderRemise() {
+  const rid = id("LAVREM", state.remise.next, 4);
+  $("remiseId").textContent = rid;
+  const items = Object.entries(state.remise.active);
+  $("remiseList").innerHTML = items.map(([item, qty]) => `<li><span>${item}</span><span>QTY ${qty}</span></li>`).join("");
+  $("remiseArchive").innerHTML = [...state.remise.archive].reverse().map((a) => `<li>${a.id} • ${a.total} pièces</li>`).join("");
+}
+if (page === "remise") {
+  renderRemise();
+  $("remiseScanForm").onsubmit = (e) => {
     e.preventDefault();
-    state.focus = els.focusInput.value.trim();
-    els.focusInput.value = "";
-    renderFocus();
-    save();
-  });
+    const item = $("remiseItem").value.trim();
+    state.remise.active[item] = (state.remise.active[item] || 0) + 1;
+    $("remiseItem").value = "";
+    save(); renderRemise();
+  };
+  $("archiveRemiseBtn").onclick = () => {
+    const total = Object.values(state.remise.active).reduce((a, b) => a + b, 0);
+    state.remise.archive.push({ id: id("LAVREM", state.remise.next, 4), total });
+    state.remise.active = {}; state.remise.next += 1;
+    save(); renderRemise();
+  };
+}
 
-  els.taskForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const title = els.taskTitle.value.trim();
-    if (!title) return;
-    state.tasks.push({
-      id: uid(),
-      title,
-      priority: els.taskPriority.value,
-      due: els.taskDue.value,
-      done: false,
-    });
-    els.taskTitle.value = "";
-    els.taskDue.value = "";
-    renderTasks();
-    renderStats();
-    save();
+function renderUsers() {
+  const ul = $("userList");
+  if (!ul) return;
+  ul.innerHTML = state.users.map((u, i) => `<li><span>${u}</span><button class="btn ghost" data-i="${i}">Supprimer</button></li>`).join("");
+  ul.querySelectorAll("button").forEach((b) => b.onclick = () => {
+    state.users.splice(Number(b.dataset.i), 1); save(); renderUsers();
   });
-
-  els.taskList.addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
-    const id = btn.dataset.id;
-    if (btn.dataset.action === "toggle") {
-      const t = state.tasks.find((task) => task.id === id);
-      if (t) t.done = !t.done;
-    }
-    if (btn.dataset.action === "delete") {
-      state.tasks = state.tasks.filter((task) => task.id !== id);
-    }
-    renderTasks();
-    renderStats();
-    save();
-  });
-
-  els.noteForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const text = els.noteInput.value.trim();
-    if (!text) return;
-    state.notes.push({ id: uid(), text, createdAt: new Date().toLocaleString("fr-FR") });
-    els.noteInput.value = "";
-    renderNotes();
-    renderStats();
-    save();
-  });
-
-  els.noteList.addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
-    if (btn.dataset.action === "delete-note") {
-      state.notes = state.notes.filter((n) => n.id !== btn.dataset.id);
-      renderNotes();
-      renderStats();
-      save();
-    }
-  });
-
-  els.habitForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const title = els.habitInput.value.trim();
-    if (!title) return;
-    state.habits.push({ id: uid(), title, doneDates: [], streak: 0 });
-    els.habitInput.value = "";
-    renderHabits();
-    renderStats();
-    save();
-  });
-
-  els.habitList.addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
-    const id = btn.dataset.id;
-    const habit = state.habits.find((h) => h.id === id);
-    if (!habit) return;
-    if (btn.dataset.action === "toggle-habit") {
-      const tk = todayKey();
-      const exists = habit.doneDates.includes(tk);
-      if (exists) {
-        habit.doneDates = habit.doneDates.filter((d) => d !== tk);
-      } else {
-        habit.doneDates.push(tk);
-      }
-      habit.streak = computeStreak(habit.doneDates);
-    }
-    if (btn.dataset.action === "delete-habit") {
-      state.habits = state.habits.filter((h) => h.id !== id);
-    }
-    renderHabits();
-    renderStats();
-    save();
-  });
-
-  els.startTimer.addEventListener("click", () => {
-    state.timer.running = true;
-    save();
-  });
-
-  els.pauseTimer.addEventListener("click", () => {
-    state.timer.running = false;
-    save();
-  });
-
-  els.resetTimer.addEventListener("click", () => {
-    state.timer.running = false;
-    resetTimerToMode();
-    renderTimer();
-    save();
-  });
-
-  els.workMinutes.addEventListener("change", () => {
-    state.timer.workMinutes = Math.max(1, Number(els.workMinutes.value || 25));
-    if (state.timer.mode === "work") resetTimerToMode();
-    renderTimer();
-    save();
-  });
-
-  els.breakMinutes.addEventListener("change", () => {
-    state.timer.breakMinutes = Math.max(1, Number(els.breakMinutes.value || 5));
-    if (state.timer.mode === "break") resetTimerToMode();
-    renderTimer();
-    save();
-  });
-
-  els.exportBtn.addEventListener("click", () => {
+}
+if (page === "parametres") {
+  $("kbInput").value = state.kb;
+  renderUsers();
+  $("userForm").onsubmit = (e) => {
+    e.preventDefault(); state.users.push($("userInput").value.trim()); $("userInput").value = ""; save(); renderUsers();
+  };
+  $("saveKbBtn").onclick = () => { state.kb = $("kbInput").value; save(); alert("KB sauvegardée localement."); };
+  $("exportAllBtn").onclick = () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
-    a.download = `nova-productivite-${todayKey()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  els.importInput.addEventListener("change", async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const text = await file.text();
-    try {
-      const data = JSON.parse(text);
-      if (!data || typeof data !== "object") throw new Error("bad");
-      Object.assign(state, data);
-      initialize();
-      save();
-    } catch {
-      alert("Fichier invalide");
-    }
-    e.target.value = "";
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (!e.altKey) return;
-    const k = e.key.toLowerCase();
-    if (k === "t") els.taskTitle.focus();
-    if (k === "n") els.noteInput.focus();
-    if (k === "f") els.focusInput.focus();
-    if (k === "p") {
-      state.timer.running = !state.timer.running;
-      save();
-    }
-  });
+    a.href = URL.createObjectURL(blob); a.download = "ops_hub_annexes.json"; a.click();
+    URL.revokeObjectURL(a.href);
+  };
 }
-
-function computeStreak(doneDates) {
-  if (!doneDates.length) return 0;
-  const set = new Set(doneDates);
-  let streak = 0;
-  const d = new Date();
-
-  while (set.has(todayKey(d))) {
-    streak += 1;
-    d.setDate(d.getDate() - 1);
-  }
-  return streak;
-}
-
-function initialize() {
-  setTheme(state.theme || "dark");
-  renderFocus();
-  renderTasks();
-  renderNotes();
-  renderHabits();
-  renderTimer();
-  renderStats();
-}
-
-load();
-bindEvents();
-initialize();
-startTimerLoop();
