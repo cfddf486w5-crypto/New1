@@ -23,6 +23,16 @@
     </nav>
 
     <main class="grid">
+      <section class="card depth wide">
+        <h2>Profil opérationnel</h2>
+        <p class="subtitle">Précharge un profil complet (identité, préférences, règles WMS) dans les annexes locales.</p>
+        <div class="inline-form">
+          <button class="btn" id="loadAlexProfileBtn">Charger le profil Alexandre Damour</button>
+          <button class="btn ghost" id="resetProfileBtn">Réinitialiser le profil chargé</button>
+        </div>
+        <pre id="profilePreview" class="code-block"></pre>
+      </section>
+
       <section class="card depth">
         <h2>Utilisateurs locaux</h2>
         <form id="userForm" class="inline-form">
