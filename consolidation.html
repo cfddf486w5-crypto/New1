@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consolidation IA • Ops Hub</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="consolidation">
+    <header class="topbar glass">
+      <div>
+        <h1>Consolidation Inventaire IA</h1>
+        <p class="subtitle">Règles SKU+BIN, split max 3, fallback type optionnel</p>
+      </div>
+      <button id="themeToggle" class="btn ghost">🌙 Thème</button>
+    </header>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="inventaire.html">Inventaire palettes</a>
+      <a href="consolidation.html" class="active">Consolidation IA</a>
+      <a href="remise.html">Remise en stock</a>
+      <a href="parametres.html">Paramètres & KB</a>
+    </nav>
+
+    <main class="grid">
+      <section class="card depth wide">
+        <h2>Imports</h2>
+        <div class="inline-form">
+          <input id="receiptInput" placeholder="SKU;BIN;QTY" />
+          <button class="btn" id="addReceiptBtn">Ajouter ligne réception</button>
+          <button class="btn ghost" id="simulateBtn">Simuler recommandations</button>
+        </div>
+      </section>
+
+      <section class="card depth">
+        <details open>
+          <summary>Rapport 1 — Toilette_Cafeteria (1–6)</summary>
+          <ul id="report1" class="list"></ul>
+        </details>
+      </section>
+
+      <section class="card depth">
+        <details open>
+          <summary>Rapport 2 — Verifier_Transfert (7–20)</summary>
+          <ul id="report2" class="list"></ul>
+        </details>
+      </section>
+
+      <section class="card depth wide">
+        <details open>
+          <summary>À valider</summary>
+          <ul id="validationList" class="list"></ul>
+        </details>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

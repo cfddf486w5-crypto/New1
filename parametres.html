@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paramètres & KB • Ops Hub</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="parametres">
+    <header class="topbar glass">
+      <div>
+        <h1>Paramètres, utilisateurs et base IA locale</h1>
+        <p class="subtitle">Annexes localStorage: users, tâches, logs, overrides, KB</p>
+      </div>
+      <button id="themeToggle" class="btn ghost">🌙 Thème</button>
+    </header>
+    <nav class="main-nav">
+      <a href="index.html">Dashboard</a>
+      <a href="inventaire.html">Inventaire palettes</a>
+      <a href="consolidation.html">Consolidation IA</a>
+      <a href="remise.html">Remise en stock</a>
+      <a href="parametres.html" class="active">Paramètres & KB</a>
+    </nav>
+
+    <main class="grid">
+      <section class="card depth">
+        <h2>Utilisateurs locaux</h2>
+        <form id="userForm" class="inline-form">
+          <input id="userInput" placeholder="Nom utilisateur" required />
+          <button class="btn">Ajouter</button>
+        </form>
+        <ul id="userList" class="list"></ul>
+      </section>
+
+      <section class="card depth wide">
+        <h2>KB IA locale</h2>
+        <textarea id="kbInput" rows="8" placeholder="Notes, standards, exceptions..."></textarea>
+        <div class="inline-form">
+          <button class="btn" id="saveKbBtn">Sauvegarder KB</button>
+          <button class="btn ghost" id="exportAllBtn">Exporter annexes JSON</button>
+        </div>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
