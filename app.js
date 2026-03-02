@@ -1,4 +1,42 @@
 const STORAGE_KEY = "opsHubV1";
+const ALEX_PROFILE_VERSION = "alexandre-damour-v1";
+const ALEX_PROFILE = {
+  identity: {
+    preferred_name: "Alexandre",
+    full_name: "Alexandre Damour",
+    role: "Superviseur entrepôt",
+    company_context: "Transbec DAI / opérations Québec (Langelier, Laval, Laval2, etc.)"
+  },
+  global_preferences: {
+    deliverables_format: ["ZIP par défaut pour projets (HTML/WMS, etc.)", "Excel .xlsm quand macros", "pages web en HTML (préférence)"],
+    style: ["efficace, précis", "UI type WMS Indago", "sections repliables (accordéons) par défaut"],
+    privacy: ["offline-first quand possible", "sensibilité confidentialité données"]
+  },
+  warehouses_context: {
+    sites: {
+      Laval2: "opérations DAI",
+      Langelier: "opérations DAI",
+      "Laval (maison mère)": "opérations Transbec",
+      Berlier: "site quitté -> opérations déplacées vers Laval2"
+    },
+    strategy_goal: "optimiser opérations, réduire pertes inventaire, éliminer zero-pick, améliorer suivi et unifier les équipes au Canada"
+  },
+  naming_and_ids: {
+    pallet_id_format: { prefix: "BE", pattern: "BE0000001", notes: "sans tiret, incrémental" },
+    lav_remise_id_format: { pattern: "LAVREM0001", basket_pattern: "LAVREMP01", notes: "sans tiret" }
+  },
+  wms_indago_context: {
+    wms: "Epicor Indago",
+    menus_rf_known: ["Picking", "Inventory", "Receiving", "Packing", "Shipping"],
+    desktop_menus_known: ["Administration", "Receipts", "Shipping", "Inventory", "Manufacturing", "Routes", "Reports", "Tools", "Maintenance", "Help"]
+  },
+  report_rules: {
+    report1: "Toilette_Cafeteria (total_after 1–6)",
+    report2: "Verifier_Transfert (total_after 7–20)",
+    validation: "À valider (hors rapports)"
+  }
+};
+
 const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};
 state.theme = state.theme || "dark";
 state.globalTasks = state.globalTasks || [];
@@ -7,6 +45,7 @@ state.consolidation = state.consolidation || { receipts: [] };
 state.remise = state.remise || { next: 1, active: {}, archive: [] };
 state.users = state.users || [];
 state.kb = state.kb || "";
+state.profile = state.profile || null;
 
 const $ = (id) => document.getElementById(id);
 const page = document.body.dataset.page;
@@ -132,9 +171,34 @@ function renderUsers() {
     state.users.splice(Number(b.dataset.i), 1); save(); renderUsers();
   });
 }
+
+function renderProfilePreview() {
+  const preview = $("profilePreview");
+  if (!preview) return;
+  if (!state.profile) {
+    preview.textContent = "Aucun profil chargé.";
+    return;
+  }
+  preview.textContent = JSON.stringify(state.profile, null, 2);
+}
+
+function loadAlexProfile() {
+  state.profile = { version: ALEX_PROFILE_VERSION, ...ALEX_PROFILE };
+  state.users = Array.from(new Set([...state.users, ALEX_PROFILE.identity.preferred_name]));
+  state.kb = [
+    `Profil actif: ${ALEX_PROFILE.identity.full_name} (${ALEX_PROFILE.identity.role})`,
+    `Contexte: ${ALEX_PROFILE.identity.company_context}`,
+    `Objectif: ${ALEX_PROFILE.warehouses_context.strategy_goal}`,
+    "Règles consolidation: garder qty=0 pour diagnostic, staging virtuel RECEPTION_STAGING, rapports 1-6 et 7-20.",
+    "Préférences: offline-first, UI type WMS Indago, livraison HTML/ZIP par défaut."
+  ].join("\n");
+  save();
+}
+
 if (page === "parametres") {
   $("kbInput").value = state.kb;
   renderUsers();
+  renderProfilePreview();
   $("userForm").onsubmit = (e) => {
     e.preventDefault(); state.users.push($("userInput").value.trim()); $("userInput").value = ""; save(); renderUsers();
   };
@@ -144,5 +208,17 @@ if (page === "parametres") {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob); a.download = "ops_hub_annexes.json"; a.click();
     URL.revokeObjectURL(a.href);
+  };
+  $("loadAlexProfileBtn").onclick = () => {
+    loadAlexProfile();
+    $("kbInput").value = state.kb;
+    renderUsers();
+    renderProfilePreview();
+    alert("Profil Alexandre chargé dans les annexes locales.");
+  };
+  $("resetProfileBtn").onclick = () => {
+    state.profile = null;
+    save();
+    renderProfilePreview();
   };
 }

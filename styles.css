@@ -54,3 +54,16 @@ input { min-width: 220px; }
 .quick:hover { border-color:var(--accent); }
 summary { cursor:pointer; font-weight:600; }
 @media (max-width: 720px) { .mobile-stack { grid-template-columns: 1fr; } }
+
+.code-block {
+  margin-top: .7rem;
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .7rem;
+  background: #0d1730;
+  color: var(--muted);
+  font-size: .85rem;
+}
+body.light .code-block { background: #f8fbff; }

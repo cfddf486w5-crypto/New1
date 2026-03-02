@@ -7,6 +7,7 @@ Application HTML/CSS/JS multi-pages orientée opérations entrepôt (offline-fir
 - Consolidation IA (imports manuels `SKU;BIN;QTY`, catégorisation rapports, section À valider).
 - Remise en stock Laval mobile-first (ID `LAVREM0001`, scan par pièce, archivage).
 - Paramètres (users locaux, KB IA locale, export annexes JSON).
+- Preset profil Alexandre (chargement en 1 clic des préférences opérationnelles Québec).
 
 ## Lancer
 
